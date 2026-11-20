@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b10">
+<meta name="description" content="Personal Nifty options trading journal and risk dashboard">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Nifty Trading Journal</title>
+<style>
+:root{--bg:#090b10;--panel:#121722;--panel2:#171f2d;--line:#283244;--gold:#d6ad55;--gold2:#f0d28c;--text:#f4f1e8;--muted:#9aa5b5;--green:#35c98a;--red:#ff6474;--blue:#8fb7ff}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(ellipse at top,#182131 0%,var(--bg) 52%);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1000px;margin:auto;padding:20px 16px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#f1d48c,#9b7028);display:grid;place-items:center;color:#111;font-weight:900;font-size:18px;box-shadow:0 5px 22px #d6ad5530}
+h1{font-size:20px;margin:0;letter-spacing:.3px}.sub{color:var(--muted);font-size:12px;letter-spacing:1.2px}
+button,.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;padding:10px 13px;font-weight:650;cursor:pointer}
+button.primary{background:linear-gradient(135deg,#e6c474,#b88832);color:#14120c;border:0}
+button.danger{color:var(--red)}button:active{transform:scale(.98)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:linear-gradient(160deg,#151c28,#10151e);border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:0 10px 28px #0003}
+.metric .k{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}.metric .v{font-size:25px;font-weight:800;margin-top:5px;letter-spacing:-.5px}.positive{color:var(--green)!important}.negative{color:var(--red)!important}.gold{color:var(--gold2)}
+.section{margin-top:17px}.section h2{font-size:15px;margin:0 0 11px;color:var(--gold2);letter-spacing:.3px}
+.fields{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
+input,select{width:100%;background:#0c111a;color:var(--text);border:1px solid #344157;border-radius:9px;padding:11px;font-size:15px;outline:none}
+input:focus,select:focus{border-color:var(--gold)}
+.smallnote{font-size:12px;color:var(--muted);margin-top:9px}
+.progress{height:9px;border-radius:20px;background:#293244;overflow:hidden;margin:10px 0 5px}.bar{height:100%;width:0;background:linear-gradient(90deg,#9b7028,#f0d28c);transition:width .2s}
+.summaryrow{display:flex;justify-content:space-between;gap:12px;margin:7px 0;color:var(--muted);font-size:13px}.summaryrow strong{color:var(--text)}
+.daylist{display:grid;grid-template-columns:1fr;gap:12px}
+.day{padding:12px;background:#0e141e;border:1px solid var(--line);border-radius:13px}
+.dayhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.daynum{font-size:14px;font-weight:800;color:var(--gold2)}.daypnl{font-weight:800;font-size:15px}.tradegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tradebox{background:#141c29;border:1px solid #29364a;border-radius:10px;padding:10px}.tradebox h3{font-size:13px;color:var(--gold2);margin:0 0 8px}.tradefields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.tradefields label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}.tradefields input,.tradebox select{padding:9px;font-size:13px}.tradebox select{margin-top:8px}.dayhint{font-size:11px;color:var(--muted);margin-top:8px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.warning{border:1px solid #76552a;background:#3a2b17;color:#f3d69b;padding:10px 12px;border-radius:10px;font-size:12px;margin-top:10px}
+.footer{color:var(--muted);font-size:11px;text-align:center;margin-top:22px}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}.fields{grid-template-columns:repeat(2,1fr)}.daylist{grid-template-columns:1fr}.wrap{padding:15px 12px 35px}.metric .v{font-size:22px}.top{align-items:flex-start}}
+@media(max-width:390px){.fields{grid-template-columns:1fr 1fr}.tradegrid{grid-template-columns:1fr}.dayhead{align-items:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brand"><div class="logo">NJ</div><div><h1>NIFTY TRADING JOURNAL</h1><div class="sub">RISK • DISCIPLINE • PERFORMANCE</div></div></div>
+  <button id="installBtn" hidden>＋ Install app</button>
+</header>
+
+<section class="grid">
+  <div class="card metric"><div class="k">Current capital</div><div class="v gold" id="currentCapital">₹10,000</div></div>
+  <div class="card metric"><div class="k">Net P&amp;L</div><div class="v" id="netPnl">₹0</div></div>
+  <div class="card metric"><div class="k">Winning days</div><div class="v positive" id="wins">0</div></div>
+  <div class="card metric"><div class="k">Completed sessions</div><div class="v" id="completed">0 / 22</div></div>
+</section>
+
+<section class="section card">
+  <h2>01 / CAPITAL &amp; MONTHLY GOAL</h2>
+  <div class="fields">
+    <div class="field"><label for="initialCapital">Initial capital (₹)</label><input id="initialCapital" type="number" min="0" step="100" value="10000"></div>
+    <div class="field"><label for="targetCapital">Target capital (₹)</label><input id="targetCapital" type="number" min="0" step="100" value="30000"></div>
+    <div class="field"><label for="sessionCount">Trading sessions</label><input id="sessionCount" type="number" min="1" max="31" step="1" value="22"></div>
+  </div>
+  <div class="progress"><div class="bar" id="goalBar"></div></div>
+  <div class="summaryrow"><span id="goalStart">₹10,000 starting capital</span><strong id="goalProgress">0% of target progress</strong></div>
+</section>
+
+<section class="section card">
+  <h2>02 / HOW YOUR TRADE P&amp;L IS CALCULATED</h2>
+  <div class="smallnote">Enter entry price, quantity, stop-loss price and target price separately for each trade. For option buying, P&amp;L = quantity × (exit price − entry price). Brokerage, taxes and slippage are not included.</div>
+  <div class="summaryrow"><span>Example: Buy ₹263, quantity 130, target ₹293</span><strong class="positive">+₹3,900</strong></div>
+  <div class="summaryrow"><span>Example: Buy ₹263, quantity 130, SL ₹253</span><strong class="negative">−₹1,300</strong></div>
+</section>
+
+<section class="section card">
+  <h2>03 / DAILY P&amp;L TRACKER</h2>
+  <div class="smallnote">Trade 2 is available only after Trade 1 hits SL. Each trade's profit or loss is calculated from its own entry, quantity and exit price.</div>
+</section>
+
+<section class="section card">
+  <h2>04 / 22-SESSION JOURNAL</h2>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px">
+    <div class="metric"><div class="k">Losing days</div><div class="v negative" id="losses">0</div></div>
+    <div class="metric"><div class="k">Win rate</div><div class="v" id="winRate">0%</div></div>
+    <div class="metric"><div class="k">Average / day</div><div class="v" id="avgPnl">₹0</div></div>
+  </div>
+  <div class="daylist" id="dayList"></div>
+  <div class="actions">
+    <button class="primary" id="exportCsv">Export CSV</button>
+    <button id="backup">Backup data</button>
+    <button id="restore">Restore backup</button>
+    <button class="danger" id="reset">Reset journal</button>
+    <input id="restoreFile" type="file" accept="application/json" hidden>
+  </div>
+  <div class="smallnote">Your journal is saved on this device/browser. Use Backup data to keep a separate copy before clearing browser data or changing phones.</div>
+</section>
+<div class="footer">PERSONAL TRADING JOURNAL • Track actual results after charges and slippage.</div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const defaults = {initialCapital:10000,targetCapital:30000,sessionCount:22};
+let data = {settings:{...defaults}, days:[]};
+let deferredPrompt = null;
+const money = n => (n<0?"−":"") + "₹" + Math.round(Math.abs(n)).toLocaleString("en-IN");
+const num = id => Math.max(0, Number($(id).value)||0);
+function readSettings(){const s={};Object.keys(defaults).forEach(k=>s[k]=num(k));s.sessionCount=Math.max(1,Math.min(31,Math.round(s.sessionCount||22)));return s;}
+function blankDay(){return {entry1:"",qty1:"",slPrice1:"",targetPrice1:"",result1:"Pending",entry2:"",qty2:"",slPrice2:"",targetPrice2:"",result2:"Not taken"};}
+function normalizeDay(d){if(!d||typeof d!=="object")return blankDay();return {...blankDay(),...d};}
+function tradePnl(d,n){const entry=Number(d['entry'+n]),qty=Number(d['qty'+n]),exit=d['result'+n]==="Target"?Number(d['targetPrice'+n]):Number(d['slPrice'+n]);if(!entry||!qty||!exit)return 0;return qty*(exit-entry);}
+function dayPnl(d){if(d.result1==="Pending")return null;let p=tradePnl(d,1);if(d.result1==="SL"&&d.result2!=="Not taken"&&d.result2!=="Pending")p+=tradePnl(d,2);return p;}
+function load(){try{const saved=JSON.parse(localStorage.getItem("niftyJournalV2"));if(saved&&saved.settings&&Array.isArray(saved.days))data=saved;}catch(e){}
+Object.keys(defaults).forEach(k=>$(k).value=data.settings[k]??defaults[k]);const s=readSettings();data.days=Array.from({length:s.sessionCount},(_,i)=>normalizeDay(data.days[i]));render();}
+function save(){data.settings=readSettings();localStorage.setItem("niftyJournalV2",JSON.stringify(data));}
+function render(){
+ const s=readSettings();data.settings=s;data.days=Array.from({length:s.sessionCount},(_,i)=>normalizeDay(data.days[i]));
+ const results=data.days.map(dayPnl),done=results.filter(v=>v!==null),pnl=done.reduce((a,b)=>a+b,0),capital=s.initialCapital+pnl;
+ const wins=results.filter(v=>v!==null&&v>0).length,losses=results.filter(v=>v!==null&&v<0).length;
+ $("currentCapital").textContent=money(capital);$("netPnl").textContent=(pnl>=0?"+":"")+money(pnl);$("netPnl").className="v "+(pnl>=0?"positive":"negative");
+ $("wins").textContent=wins;$("completed").textContent=done.length+" / "+s.sessionCount;$("losses").textContent=losses;$("winRate").textContent=done.length?(wins/done.length*100).toFixed(1)+"%":"0%";$("avgPnl").textContent=done.length?money(pnl/done.length):"₹0";
+ const progress=s.targetCapital>s.initialCapital?Math.max(0,Math.min(100,(capital-s.initialCapital)/(s.targetCapital-s.initialCapital)*100)):(capital>=s.targetCapital?100:0);
+ $("goalBar").style.width=progress+"%";$("goalStart").textContent=money(s.initialCapital)+" starting capital";$("goalProgress").textContent=progress.toFixed(1)+"% of target progress";
+ const list=$("dayList");list.innerHTML="";
+ data.days.forEach((d,i)=>{
+  const row=document.createElement("div");row.className="day";
+  const pnlDay=dayPnl(d);const head=document.createElement("div");head.className="dayhead";
+  const label=document.createElement("div");label.className="daynum";label.textContent="DAY "+(i+1);
+  const val=document.createElement("div");val.className="daypnl";val.textContent=pnlDay===null?"In progress":(pnlDay>0?"+":"")+money(pnlDay);if(pnlDay>0)val.classList.add("positive");else if(pnlDay<0)val.classList.add("negative");head.append(label,val);row.append(head);
+  const trades=document.createElement("div");trades.className="tradegrid";
+  function makeTrade(n,resultKey,disabled){
+   const box=document.createElement("div");box.className="tradebox";const h=document.createElement("h3");h.textContent="TRADE "+n;box.append(h);
+   const fields=document.createElement("div");fields.className="tradefields";
+   const specs=[["entry","Entry price (₹)"],["qty","Quantity"],["slPrice","Stop-loss price (₹)"],["targetPrice","Target price (₹)"]];
+   specs.forEach(([key,title])=>{const prop=key+n,wrap=document.createElement("div"),lab=document.createElement("label"),input=document.createElement("input");lab.textContent=title;input.type="number";input.min="0";input.step=key==="qty"?"1":"0.05";input.placeholder=key==="qty"?"e.g. 130":"Enter value";input.value=d[prop];input.disabled=disabled;input.addEventListener("change",()=>{d[prop]=input.value;save();render();});wrap.append(lab,input);fields.append(wrap);});box.append(fields);
+   const select=document.createElement("select");select.disabled=disabled;const opts=n===1?[["Pending","Select result"],["Target","Target hit"],["SL","Stop-loss hit"]]:[["Not taken","Not taken"],["Pending","Select result"],["Target","Target hit"],["SL","Stop-loss hit"]];opts.forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;select.append(o);});select.value=d[resultKey];select.addEventListener("change",()=>{d[resultKey]=select.value;if(n===1&&d.result1!=="SL")d.result2="Not taken";save();render();});box.append(select);
+   const preview=document.createElement("div");preview.className="dayhint";const ent=Number(d['entry'+n]),qty=Number(d['qty'+n]),exit=d[resultKey]==="Target"?Number(d['targetPrice'+n]):Number(d['slPrice'+n]);if(d[resultKey]==="Target"||d[resultKey]==="SL"){const val=qty*(exit-ent);preview.textContent="Calculated P&L: "+(val>=0?"+":"")+money(val);}else preview.textContent="Enter entry, quantity, SL and target prices.";box.append(preview);return box;
+  }
+  trades.append(makeTrade(1,"result1",false));trades.append(makeTrade(2,"result2",d.result1!=="SL"));row.append(trades);
+  const hint=document.createElement("div");hint.className="dayhint";hint.textContent=d.result1==="SL"?"Trade 2 is enabled. Enter its entry price, quantity, SL and target, then select the result.":d.result1==="Target"?"Trade 1 target achieved. Trade 2 is not applicable.":"Enter Trade 1 entry price, quantity, SL price and target price, then select the result.";row.append(hint);list.append(row);
+ });
+ save();
+}
+Object.keys(defaults).forEach(k=>$(k).addEventListener("change",()=>{if(k==="sessionCount"){const n=Math.max(1,Math.min(31,Math.round(num(k)||22)));data.days=Array.from({length:n},(_,i)=>normalizeDay(data.days[i]));}render();}));
+$("exportCsv").addEventListener("click",()=>{let csv="Day,Trade 1 Entry,Trade 1 Qty,Trade 1 SL Price,Trade 1 Target Price,Trade 1 Result,Trade 2 Entry,Trade 2 Qty,Trade 2 SL Price,Trade 2 Target Price,Trade 2 Result,Daily P&L (INR)\n";data.days.forEach((d,i)=>csv+=`${i+1},${d.entry1},${d.qty1},${d.slPrice1},${d.targetPrice1},${d.result1},${d.entry2},${d.qty2},${d.slPrice2},${d.targetPrice2},${d.result2},${dayPnl(d)??""}\n`);csv+=`\nInitial Capital,${readSettings().initialCapital}\nClosing Capital,${readSettings().initialCapital+data.days.reduce((a,d)=>a+(dayPnl(d)??0),0)}\n`;download("nifty-trading-journal.csv",csv,"text/csv");});
+$("backup").addEventListener("click",()=>download("nifty-journal-backup.json",JSON.stringify(data,null,2),"application/json"));$("restore").addEventListener("click",()=>$("restoreFile").click());
+$("restoreFile").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!x.settings||!Array.isArray(x.days))throw Error();data=x;load();alert("Backup restored.");}catch(err){alert("Invalid backup file.");}e.target.value="";});
+$("reset").addEventListener("click",()=>{if(confirm("Reset all journal entries? This cannot be undone unless you have a backup.")){data.days=Array.from({length:readSettings().sessionCount},()=>blankDay(readSettings()));save();render();}});
+function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBtn").hidden=false;});$("installBtn").addEventListener("click",async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$("installBtn").hidden=true;});
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("./sw.js").catch(()=>{});load();
+</script>
+</body></html>
