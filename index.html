@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b10">
+<meta name="description" content="Universal multi-instrument trading journal and performance dashboard">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Universal Trading Journal</title>
+<style>
+:root{--bg:#090b10;--panel:#121722;--panel2:#171f2d;--line:#283244;--gold:#d6ad55;--gold2:#f0d28c;--text:#f4f1e8;--muted:#9aa5b5;--green:#35c98a;--red:#ff6474;--blue:#8fb7ff}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(ellipse at top,#182131 0%,var(--bg) 52%);color:var(--text);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:1000px;margin:auto;padding:20px 16px 50px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:11px}.logo{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#f1d48c,#9b7028);display:grid;place-items:center;color:#111;font-weight:900;font-size:18px;box-shadow:0 5px 22px #d6ad5530}
+h1{font-size:20px;margin:0;letter-spacing:.3px}.sub{color:var(--muted);font-size:12px;letter-spacing:1.2px}
+button,.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;padding:10px 13px;font-weight:650;cursor:pointer}
+button.primary{background:linear-gradient(135deg,#e6c474,#b88832);color:#14120c;border:0}
+button.danger{color:var(--red)}button:active{transform:scale(.98)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:linear-gradient(160deg,#151c28,#10151e);border:1px solid var(--line);border-radius:16px;padding:15px;box-shadow:0 10px 28px #0003}
+.metric .k{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px}.metric .v{font-size:25px;font-weight:800;margin-top:5px;letter-spacing:-.5px}.positive{color:var(--green)!important}.negative{color:var(--red)!important}.gold{color:var(--gold2)}
+.section{margin-top:17px}.section h2{font-size:15px;margin:0 0 11px;color:var(--gold2);letter-spacing:.3px}
+.fields{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.field label{display:block;color:var(--muted);font-size:12px;margin-bottom:5px}
+input,select{width:100%;background:#0c111a;color:var(--text);border:1px solid #344157;border-radius:9px;padding:11px;font-size:15px;outline:none}
+input:focus,select:focus{border-color:var(--gold)}
+.smallnote{font-size:12px;color:var(--muted);margin-top:9px}
+.progress{height:9px;border-radius:20px;background:#293244;overflow:hidden;margin:10px 0 5px}.bar{height:100%;width:0;background:linear-gradient(90deg,#9b7028,#f0d28c);transition:width .2s}
+.summaryrow{display:flex;justify-content:space-between;gap:12px;margin:7px 0;color:var(--muted);font-size:13px}.summaryrow strong{color:var(--text)}
+.daylist{display:grid;grid-template-columns:1fr;gap:12px}
+.day{padding:12px;background:#0e141e;border:1px solid var(--line);border-radius:13px}
+.dayhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.daynum{font-size:14px;font-weight:800;color:var(--gold2)}.daypnl{font-weight:800;font-size:15px}.tradegrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tradebox{background:#141c29;border:1px solid #29364a;border-radius:10px;padding:10px}.tradebox h3{font-size:13px;color:var(--gold2);margin:0 0 8px}.tradefields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.tradefields label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}.tradefields input,.tradebox select{padding:9px;font-size:13px}.tradebox select{margin-top:8px}.dayhint{font-size:11px;color:var(--muted);margin-top:8px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.warning{border:1px solid #76552a;background:#3a2b17;color:#f3d69b;padding:10px 12px;border-radius:10px;font-size:12px;margin-top:10px}
+.footer{color:var(--muted);font-size:11px;text-align:center;margin-top:22px}
+@media(max-width:700px){.grid{grid-template-columns:repeat(2,1fr)}.fields{grid-template-columns:repeat(2,1fr)}.daylist{grid-template-columns:1fr}.wrap{padding:15px 12px 35px}.metric .v{font-size:22px}.top{align-items:flex-start}}
+@media(max-width:390px){.fields{grid-template-columns:1fr 1fr}.tradegrid{grid-template-columns:1fr}.dayhead{align-items:flex-start}}
+
+.calendar-wrap{margin-top:14px;background:#0e141e;border:1px solid var(--line);border-radius:13px;padding:12px}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.calendar-head strong{color:var(--gold2);font-size:15px}
+.calendar-nav{display:flex;gap:6px}.calendar-nav button{padding:7px 11px}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.calendar-weekday{text-align:center;color:var(--muted);font-size:10px;padding:4px 0}
+.calendar-cell{min-height:58px;border:1px solid #29364a;border-radius:8px;background:#111925;padding:5px 2px;text-align:center;display:flex;flex-direction:column;justify-content:space-between;align-items:center;cursor:pointer}
+.calendar-cell.empty{visibility:hidden}.calendar-cell .date-num{font-size:12px;font-weight:750}.calendar-cell .date-pnl{font-size:9px;line-height:1.1}
+.calendar-cell.profit{background:#103326;border-color:#267d59}.calendar-cell.loss{background:#3a1b25;border-color:#8c3949}.calendar-cell.flat{background:#252c37;border-color:#4b5565}
+.calendar-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;color:var(--muted);font-size:11px}
+.legend-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.date-field{margin:0 0 10px;max-width:240px}
+@media(max-width:390px){.calendar-cell{min-height:50px}.calendar-cell .date-pnl{font-size:8px}}\n.tradebox .trade-meta input{padding:9px;font-size:13px}
+
+.trade-meta{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:9px}
+.trade-meta label,.trade-notes label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+.trade-meta input,.trade-meta select,.trade-notes textarea{width:100%;padding:9px;font-size:13px}
+.trade-notes{margin-top:9px}.trade-notes textarea{min-height:64px;resize:vertical}
+.evidence{margin-top:10px;padding:9px;border:1px dashed #46536a;border-radius:10px}
+.evidence label{display:block;color:var(--muted);font-size:12px;margin-bottom:7px}
+.evidence input{font-size:12px;padding:7px}
+.evidence-preview{display:block;max-width:100%;max-height:240px;object-fit:contain;margin-top:8px;border-radius:8px;border:1px solid var(--line)}
+.evidence-status{font-size:11px;color:var(--muted);margin-top:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <div class="brand"><div class="logo">NJ</div><div><h1>UNIVERSAL TRADING JOURNAL</h1><div class="sub">RISK • DISCIPLINE • PERFORMANCE</div></div></div>
+  <button id="installBtn" hidden>＋ Install app</button>
+</header>
+
+<section class="grid">
+  <div class="card metric"><div class="k">Current capital</div><div class="v gold" id="currentCapital">₹10,000</div></div>
+  <div class="card metric"><div class="k">Net P&amp;L</div><div class="v" id="netPnl">₹0</div></div>
+  <div class="card metric"><div class="k">Winning days</div><div class="v positive" id="wins">0</div></div>
+  <div class="card metric"><div class="k">Completed sessions</div><div class="v" id="completed">0 / 22</div></div>
+</section>
+
+<section class="section card">
+  <h2>01 / CAPITAL &amp; MONTHLY GOAL</h2>
+  <div class="fields">
+    <div class="field"><label for="initialCapital">Initial capital (₹)</label><input id="initialCapital" type="number" min="0" step="100" value="10000"></div>
+    <div class="field"><label for="targetCapital">Target capital (₹)</label><input id="targetCapital" type="number" min="0" step="100" value="30000"></div>
+    <div class="field"><label for="sessionCount">Trading sessions</label><input id="sessionCount" type="number" min="1" max="31" step="1" value="22"></div>
+  </div>
+  <div class="progress"><div class="bar" id="goalBar"></div></div>
+  <div class="summaryrow"><span id="goalStart">₹10,000 starting capital</span><strong id="goalProgress">0% of target progress</strong></div>
+</section>
+
+<section class="section card">
+  <h2>02 / HOW YOUR TRADE P&amp;L IS CALCULATED</h2>
+  <div class="smallnote">Enter entry price, quantity, stop-loss price and target price separately for each trade. For option buying, P&amp;L = quantity × (exit price − entry price). Brokerage, taxes and slippage are not included.</div>
+  <div class="summaryrow"><span>Example: Buy ₹263, quantity 130, target ₹293</span><strong class="positive">+₹3,900</strong></div>
+  <div class="summaryrow"><span>Example: Buy ₹263, quantity 130, SL ₹253</span><strong class="negative">−₹1,300</strong></div>
+</section>
+
+<section class="section card">
+  <h2>03 / DAILY P&amp;L TRACKER</h2>
+  <div class="smallnote">Trade 2 is available only after Trade 1 hits SL. Each trade's profit or loss is calculated from its own entry, quantity and exit price.</div>
+</section>
+
+
+<section class="section card" id="monthlyCalendarSection">
+  <h2>04 / MONTHLY PERFORMANCE CALENDAR</h2>
+  <div class="smallnote">Green = profit · Red = loss · Grey = no trade. Tap a recorded date to jump to its session.</div>
+  <div class="calendar-wrap">
+    <div class="calendar-head">
+      <button id="calPrev" aria-label="Previous month">‹</button>
+      <strong id="calendarTitle">November 2026</strong>
+      <button id="calNext" aria-label="Next month">›</button>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+    <div class="calendar-legend">
+      <span><i class="legend-dot" style="background:#35c98a"></i>Profit</span>
+      <span><i class="legend-dot" style="background:#ff6474"></i>Loss</span>
+      <span><i class="legend-dot" style="background:#697586"></i>No trade / blank</span>
+    </div>
+  </div>
+</section>
+
+<section class="section card">
+  <h2>05 / MONTHLY TRADE JOURNAL</h2>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px">
+    <div class="metric"><div class="k">Losing days</div><div class="v negative" id="losses">0</div></div>
+    <div class="metric"><div class="k">Win rate</div><div class="v" id="winRate">0%</div></div>
+    <div class="metric"><div class="k">Average / day</div><div class="v" id="avgPnl">₹0</div></div>
+  </div>
+  <div class="field" style="margin:0 0 12px"><label for="monthSelect">Trading month / archived journal</label><select id="monthSelect"></select></div>
+  <div class="smallnote" id="monthStatus">All instruments and symbols are supported. Your monthly journal and trade details are saved automatically. Screenshots are stored on this device; include them using Backup data.</div>
+  <div class="daylist" id="dayList"></div>
+  <div class="actions">
+    <button class="primary" id="exportCsv">Export CSV</button>
+    <button id="backup">Backup data</button>
+    <button id="restore">Restore backup</button>
+    <button class="danger" id="reset">Reset journal</button>
+    <input id="restoreFile" type="file" accept="application/json" hidden>
+  </div>
+  <div class="smallnote">Your journal is saved on this device/browser. Use Backup data to export journal entries and uploaded screenshots before clearing browser data or changing phones.</div>
+</section>
+<div class="footer">UNIVERSAL TRADING JOURNAL • Track actual results after charges and slippage.</div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const defaults = {initialCapital:10000,targetCapital:30000,sessionCount:22};
+const STORAGE_KEY = "niftyJournalMonthlyV5"; // Kept unchanged to preserve existing monthly records.
+const LEGACY_KEYS = ["niftyJournalV2","niftyJournalV1"];
+const money = n => (n<0?"−":"") + "₹" + Math.round(Math.abs(n)).toLocaleString("en-IN");
+const num = id => Math.max(0, Number($(id).value)||0);
+const monthKey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+const monthLabel = key => {const [y,m]=key.split("-").map(Number);return new Date(y,m-1,1).toLocaleDateString("en-IN",{month:"long",year:"numeric"});};
+const nextMonth = key => {const [y,m]=key.split("-").map(Number);return monthKey(new Date(y,m,1));};
+function readSettings(){const s={};Object.keys(defaults).forEach(k=>s[k]=num(k));s.sessionCount=Math.max(1,Math.min(31,Math.round(s.sessionCount||22)));return s;}
+function blankDay(){return {tradingDate:"",
+ entry1:"",qty1:"",slPrice1:"",targetPrice1:"",exitPrice1:"",result1:"Pending",
+ assetClass1:"Index",symbol1:"NIFTY",tradeType1:"Options",direction1:"Buy",strategy1:"",
+ optionType1:"CE",strike1:"",expiry1:"",notes1:"",
+ entry2:"",qty2:"",slPrice2:"",targetPrice2:"",exitPrice2:"",result2:"Not taken",
+ assetClass2:"Index",symbol2:"NIFTY",tradeType2:"Options",direction2:"Buy",strategy2:"",
+ optionType2:"CE",strike2:"",expiry2:"",notes2:""};}
+function normalizeDay(d){if(!d||typeof d!=="object")return blankDay();return {...blankDay(),...d};}
+function blankMonth(settings){return {settings:{...settings},days:Array.from({length:settings.sessionCount},blankDay)};}
+let data={months:{},activeMonth:monthKey(new Date()),latestMonth:monthKey(new Date())};
+let deferredPrompt=null;
+function activeRecord(){return data.months[data.activeMonth];}
+function tradePnl(d,n){
+ const entry=Number(d['entry'+n]),qty=Number(d['qty'+n]),result=d['result'+n];
+ const exit=Number(d['exitPrice'+n])||(result==="Target"?Number(d['targetPrice'+n]):Number(d['slPrice'+n]));
+ if(!entry||!qty||!exit)return 0;
+ return qty*(d['direction'+n]==="Sell"?entry-exit:exit-entry);
+}
+function dayPnl(d){if(d.result1==="Pending")return null;let p=tradePnl(d,1);if(d.result1==="SL"&&d.result2!=="Not taken"&&d.result2!=="Pending")p+=tradePnl(d,2);return p;}
+function completedCount(rec){return rec.days.filter(d=>dayPnl(d)!==null).length;}
+function migrateLegacy(){
+ let legacy=null;for(const key of LEGACY_KEYS){try{const x=JSON.parse(localStorage.getItem(key));if(x&&x.settings&&Array.isArray(x.days)){legacy=x;break;}}catch(e){}}
+ const key=monthKey(new Date());const settings={...defaults,...(legacy?.settings||{})};settings.sessionCount=Math.max(1,Math.min(31,Number(settings.sessionCount)||22));
+ const days=legacy?Array.from({length:settings.sessionCount},(_,i)=>normalizeDay(legacy.days[i])):Array.from({length:settings.sessionCount},blankDay);
+ data={months:{[key]:{settings,days}},activeMonth:key,latestMonth:key};
+}
+function load(){
+ try{const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));if(saved&&saved.months&&saved.activeMonth){data=saved;}else migrateLegacy();}catch(e){migrateLegacy();}
+ if(!data.months[data.activeMonth])data.months[data.activeMonth]=blankMonth(defaults);
+ if(!data.latestMonth)data.latestMonth=data.activeMonth;
+ applyRecordToInputs();render();
+}
+function applyRecordToInputs(){const rec=activeRecord();Object.keys(defaults).forEach(k=>$(k).value=rec.settings[k]??defaults[k]);}
+function save(){
+ const rec=activeRecord();rec.settings=readSettings();
+ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));}
+ catch(err){
+  const status=$("monthStatus");
+  if(status)status.textContent="Storage is full or unavailable. Export a backup before closing this app. Your data has not been intentionally cleared.";
+  console.error("Journal save failed",err);
+ }
+}
+
+const IMAGE_DB_NAME="niftyJournalTradeImagesV1"; // Keep existing screenshots.
+let imageDbPromise=null;
+function openImageDb(){
+ if(imageDbPromise)return imageDbPromise;
+ imageDbPromise=new Promise((resolve,reject)=>{
+  const req=indexedDB.open(IMAGE_DB_NAME,1);
+  req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains("images"))db.createObjectStore("images",{keyPath:"id"});};
+  req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+ });
+ return imageDbPromise;
+}
+async function saveTradeImage(id,blob){
+ const db=await openImageDb();
+ return new Promise((resolve,reject)=>{const tx=db.transaction("images","readwrite");tx.objectStore("images").put({id,blob});tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});
+}
+async function getTradeImage(id){
+ try{const db=await openImageDb();return await new Promise((resolve,reject)=>{const tx=db.transaction("images","readonly"),req=tx.objectStore("images").get(id);req.onsuccess=()=>resolve(req.result?.blob||null);req.onerror=()=>reject(req.error);});}catch(e){return null;}
+}
+async function getAllTradeImages(){
+ const db=await openImageDb();return new Promise((resolve,reject)=>{const tx=db.transaction("images","readonly"),req=tx.objectStore("images").getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error);});
+}
+function imageKey(month,dayIndex,tradeNo){return `${month}|${dayIndex}|${tradeNo}`;}
+async function compressImage(file){
+ const img=new Image(),url=URL.createObjectURL(file);
+ try{
+  await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject;img.src=url;});
+  const scale=Math.min(1,1400/img.width),canvas=document.createElement("canvas");
+  canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
+  canvas.getContext("2d").drawImage(img,0,0,canvas.width,canvas.height);
+  return await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.78));
+ }finally{URL.revokeObjectURL(url);}
+}
+function blobToDataUrl(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(blob);});}
+function dataUrlToBlob(dataUrl){return fetch(dataUrl).then(r=>r.blob());}
+function populateMonthSelect(){const sel=$("monthSelect");sel.innerHTML="";Object.keys(data.months).sort().reverse().forEach(k=>{const o=document.createElement("option");o.value=k;o.textContent=monthLabel(k)+(k===data.latestMonth?" • Current":" • Archived");sel.append(o);});sel.value=data.activeMonth;}
+function maybeAdvanceMonth(){
+ if(data.activeMonth!==data.latestMonth)return false;
+ const rec=activeRecord();if(completedCount(rec)<rec.settings.sessionCount)return false;
+ const next=nextMonth(data.latestMonth);
+ if(!data.months[next]){
+   const closing=rec.settings.initialCapital+rec.days.reduce((sum,d)=>sum+(dayPnl(d)??0),0);
+   const nextSettings={...rec.settings,initialCapital:closing};
+   data.months[next]=blankMonth(nextSettings);
+ }
+ data.latestMonth=next;data.activeMonth=next;save();applyRecordToInputs();return true;
+}
+function render(){
+ const rec=activeRecord();if(!rec)return;const s=readSettings();rec.settings=s;rec.days=Array.from({length:s.sessionCount},(_,i)=>normalizeDay(rec.days[i]));
+ const results=rec.days.map(dayPnl),done=results.filter(v=>v!==null),pnl=done.reduce((a,b)=>a+b,0),capital=s.initialCapital+pnl;
+ const wins=results.filter(v=>v!==null&&v>0).length,losses=results.filter(v=>v!==null&&v<0).length;
+ $("currentCapital").textContent=money(capital);$("netPnl").textContent=(pnl>=0?"+":"")+money(pnl);$("netPnl").className="v "+(pnl>=0?"positive":"negative");
+ $("wins").textContent=wins;$("completed").textContent=done.length+" / "+s.sessionCount;$("losses").textContent=losses;$("winRate").textContent=done.length?(wins/done.length*100).toFixed(1)+"%":"0%";$("avgPnl").textContent=done.length?money(pnl/done.length):"₹0";
+ const progress=s.targetCapital>s.initialCapital?Math.max(0,Math.min(100,(capital-s.initialCapital)/(s.targetCapital-s.initialCapital)*100)):(capital>=s.targetCapital?100:0);
+ $("goalBar").style.width=progress+"%";$("goalStart").textContent=money(s.initialCapital)+" starting capital";$("goalProgress").textContent=progress.toFixed(1)+"% of target progress";
+ populateMonthSelect();renderCalendar();$("monthStatus").textContent=rec.days.length+" sessions · "+done.length+" completed · "+(data.activeMonth===data.latestMonth?"Current journal":"Archived journal (view only recommended)");
+ const list=$("dayList");list.innerHTML="";
+ rec.days.forEach((d,i)=>{
+  const row=document.createElement("div");row.className="day";const pnlDay=dayPnl(d);const head=document.createElement("div");head.className="dayhead";
+  const label=document.createElement("div");label.className="daynum";label.textContent="DAY "+(i+1);
+  const val=document.createElement("div");val.className="daypnl";val.textContent=pnlDay===null?"In progress":(pnlDay>0?"+":"")+money(pnlDay);if(pnlDay>0)val.classList.add("positive");else if(pnlDay<0)val.classList.add("negative");head.append(label,val);row.append(head);
+  const dateWrap=document.createElement("div");dateWrap.className="field date-field";
+  const dateLabel=document.createElement("label");dateLabel.textContent="Trading date";
+  const dateInput=document.createElement("input");dateInput.type="date";dateInput.value=d.tradingDate||"";
+  dateInput.addEventListener("change",()=>{d.tradingDate=dateInput.value;save();renderCalendar();});
+  dateWrap.append(dateLabel,dateInput);row.append(dateWrap);
+  row.id="session-day-"+(i+1);
+  const trades=document.createElement("div");trades.className="tradegrid";
+  function makeTrade(n,resultKey,disabled){
+   const box=document.createElement("div");box.className="tradebox";const h=document.createElement("h3");h.textContent="TRADE "+n;box.append(h);
+   const instrumentMeta=document.createElement("div");instrumentMeta.className="trade-meta";
+   function addMetaSelect(key,label,options){
+    const wrap=document.createElement("div"),lab=document.createElement("label"),sel=document.createElement("select");
+    lab.textContent=label;options.forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;sel.append(o);});
+    sel.value=d[key+n]||options[0][0];sel.disabled=disabled;
+    sel.addEventListener("change",()=>{d[key+n]=sel.value;save();});
+    wrap.append(lab,sel);instrumentMeta.append(wrap);
+   }
+   function addMetaInput(key,label,placeholder){
+    const wrap=document.createElement("div"),lab=document.createElement("label"),input=document.createElement("input");
+    lab.textContent=label;input.type="text";input.placeholder=placeholder;input.value=d[key+n]||"";input.disabled=disabled;
+    input.addEventListener("change",()=>{d[key+n]=input.value.trim();save();});
+    wrap.append(lab,input);instrumentMeta.append(wrap);
+   }
+   addMetaSelect("assetClass","Market",[["Index","Index"],["Stock","Stock"],["Crypto","Crypto"],["Commodity","Commodity"],["Forex","Forex"],["Other","Other"]]);
+   addMetaInput("symbol","Trading symbol","e.g. NIFTY, RELIANCE, BTCUSD");
+   addMetaSelect("tradeType","Product type",[["Options","Options"],["Futures","Futures"],["Equity","Equity"],["Spot","Spot"],["Perpetual","Perpetual"],["Forex","Forex"]]);
+   addMetaSelect("direction","Direction",[["Buy","Buy / Long"],["Sell","Sell / Short"]]);
+   addMetaInput("strategy","Strategy / setup","e.g. Trendline rejection");
+   box.append(instrumentMeta);
+   const fields=document.createElement("div");fields.className="tradefields";
+   [["entry","Entry price (₹)"],["qty","Quantity"],["slPrice","Stop-loss price (₹)"],["targetPrice","Target price (₹)"]].forEach(([key,title])=>{const prop=key+n,wrap=document.createElement("div"),lab=document.createElement("label"),input=document.createElement("input");lab.textContent=title;input.type="number";input.min="0";input.step=key==="qty"?"1":"0.05";input.placeholder=key==="qty"?"e.g. 130":"Enter value";input.value=d[prop];input.disabled=disabled;input.addEventListener("change",()=>{d[prop]=input.value;save();render();});wrap.append(lab,input);fields.append(wrap);});box.append(fields);
+   const meta=document.createElement("div");meta.className="trade-meta";
+   const optionWrap=document.createElement("div"),optionLab=document.createElement("label"),optionSel=document.createElement("select");optionLab.textContent="Option type";[["CE","CE"],["PE","PE"]].forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;optionSel.append(o);});optionSel.value=d["optionType"+n]||"CE";optionSel.disabled=disabled;optionSel.addEventListener("change",()=>{d["optionType"+n]=optionSel.value;save();});optionWrap.append(optionLab,optionSel);
+   const strikeWrap=document.createElement("div"),strikeLab=document.createElement("label"),strikeInput=document.createElement("input");strikeLab.textContent="Strike price";strikeInput.type="number";strikeInput.placeholder="e.g. 25700";strikeInput.value=d["strike"+n]||"";strikeInput.disabled=disabled;strikeInput.addEventListener("change",()=>{d["strike"+n]=strikeInput.value;save();});strikeWrap.append(strikeLab,strikeInput);
+   const expiryWrap=document.createElement("div"),expiryLab=document.createElement("label"),expiryInput=document.createElement("input");expiryLab.textContent="Expiry date";expiryInput.type="date";expiryInput.value=d["expiry"+n]||"";expiryInput.disabled=disabled;expiryInput.addEventListener("change",()=>{d["expiry"+n]=expiryInput.value;save();});expiryWrap.append(expiryLab,expiryInput);
+   meta.append(optionWrap,strikeWrap,expiryWrap);box.append(meta);
+   const exitWrap=document.createElement("div"),exitLab=document.createElement("label"),exitInput=document.createElement("input");
+   exitWrap.className="trade-notes";exitLab.textContent="Actual exit price (optional; overrides SL / target)";
+   exitInput.type="number";exitInput.min="0";exitInput.step="0.05";exitInput.placeholder="Leave blank to use selected SL / target";
+   exitInput.value=d["exitPrice"+n]||"";exitInput.disabled=disabled;
+   exitInput.addEventListener("change",()=>{d["exitPrice"+n]=exitInput.value;save();render();});
+   exitWrap.append(exitLab,exitInput);box.append(exitWrap);
+   const notesWrap=document.createElement("div");notesWrap.className="trade-notes";const notesLab=document.createElement("label"),notesInput=document.createElement("textarea");notesLab.textContent="Trade notes / entry reason";notesInput.placeholder="Why did you take this CE/PE trade?";notesInput.value=d["notes"+n]||"";notesInput.disabled=disabled;notesInput.addEventListener("change",()=>{d["notes"+n]=notesInput.value;save();});notesWrap.append(notesLab,notesInput);box.append(notesWrap);
+   const evidence=document.createElement("div");evidence.className="evidence";const evidenceLab=document.createElement("label");evidenceLab.textContent="Trade chart screenshot";const fileInput=document.createElement("input");fileInput.type="file";fileInput.accept="image/*";fileInput.disabled=disabled;const evidenceStatus=document.createElement("div");evidenceStatus.className="evidence-status";evidenceStatus.textContent="Upload a TradingView or Dhan screenshot (saved on this device).";const imagePreview=document.createElement("img");imagePreview.className="evidence-preview";imagePreview.hidden=true;
+   const imgId=imageKey(data.activeMonth,i+1,n);
+   getTradeImage(imgId).then(blob=>{if(blob){imagePreview.src=URL.createObjectURL(blob);imagePreview.hidden=false;evidenceStatus.textContent="Screenshot saved";}});
+   fileInput.addEventListener("change",async()=>{const file=fileInput.files?.[0];if(!file)return;if(!file.type.startsWith("image/")){alert("Please choose an image file.");return;}try{evidenceStatus.textContent="Saving screenshot…";const blob=await compressImage(file);await saveTradeImage(imgId,blob);if(imagePreview.src)URL.revokeObjectURL(imagePreview.src);imagePreview.src=URL.createObjectURL(blob);imagePreview.hidden=false;evidenceStatus.textContent="Screenshot saved on this device";}catch(e){evidenceStatus.textContent="Could not save image. Please try a smaller screenshot.";}});evidence.append(evidenceLab,fileInput,evidenceStatus,imagePreview);box.append(evidence);
+   const select=document.createElement("select");select.disabled=disabled;const opts=n===1?[["Pending","Select result"],["Target","Target hit"],["SL","Stop-loss hit"]]:[["Not taken","Not taken"],["Pending","Select result"],["Target","Target hit"],["SL","Stop-loss hit"]];opts.forEach(([v,t])=>{const o=document.createElement("option");o.value=v;o.textContent=t;select.append(o);});select.value=d[resultKey];select.addEventListener("change",()=>{d[resultKey]=select.value;if(n===1&&d.result1!=="SL")d.result2="Not taken";save();if(maybeAdvanceMonth()){render();return;}render();});box.append(select);
+   const preview=document.createElement("div");preview.className="dayhint";
+   if(d[resultKey]==="Target"||d[resultKey]==="SL"){const val=tradePnl(d,n);preview.textContent="Calculated P&L: "+(val>=0?"+":"")+money(val);}
+   else preview.textContent="Enter symbol, direction, entry, quantity, SL and target prices.";
+   box.append(preview);return box;
+  }
+  trades.append(makeTrade(1,"result1",false));trades.append(makeTrade(2,"result2",d.result1!=="SL"));row.append(trades);
+  const hint=document.createElement("div");hint.className="dayhint";hint.textContent=d.result1==="SL"?"Trade 2 is enabled. Enter its entry price, quantity, SL and target, then select the result.":d.result1==="Target"?"Trade 1 target achieved. Trade 2 is not applicable.":"Enter Trade 1 entry price, quantity, SL price and target price, then select the result.";row.append(hint);list.append(row);
+ });save();
+}
+
+let calendarCursor = new Date(...data.activeMonth.split("-").map((v,i)=>i===1?Number(v)-1:Number(v)));
+function renderCalendar(){
+ const grid=$("calendarGrid"); if(!grid)return;
+ const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();
+ $("calendarTitle").textContent=new Date(y,m,1).toLocaleDateString("en-IN",{month:"long",year:"numeric"});
+ grid.innerHTML="";
+ ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].forEach(w=>{const el=document.createElement("div");el.className="calendar-weekday";el.textContent=w;grid.append(el);});
+ const first=new Date(y,m,1).getDay(),total=new Date(y,m+1,0).getDate();
+ for(let i=0;i<first;i++){const e=document.createElement("div");e.className="calendar-cell empty";grid.append(e);}
+ const rec=activeRecord();
+ for(let day=1;day<=total;day++){
+  const key=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+  const found=rec.days.map((d,i)=>({d,i})).filter(x=>x.d.tradingDate===key);
+  const cell=document.createElement("button");cell.type="button";cell.className="calendar-cell";
+  const n=document.createElement("span");n.className="date-num";n.textContent=day;cell.append(n);
+  if(found.length){
+   const pnl=found.reduce((sum,x)=>sum+(dayPnl(x.d)??0),0);
+   cell.classList.add(pnl>0?"profit":pnl<0?"loss":"flat");
+   const p=document.createElement("span");p.className="date-pnl";p.textContent=money(pnl);cell.append(p);
+   cell.title=found.map(x=>"Day "+(x.i+1)).join(", ");
+   cell.addEventListener("click",()=>{const target=$("session-day-"+(found[0].i+1));target?.scrollIntoView({behavior:"smooth",block:"start"});});
+  } else {
+   const p=document.createElement("span");p.className="date-pnl";p.textContent="—";cell.append(p);
+  }
+  grid.append(cell);
+ }
+}
+$("calPrev").addEventListener("click",()=>{calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()-1,1);renderCalendar();});
+$("calNext").addEventListener("click",()=>{calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+1,1);renderCalendar();});
+
+$("monthSelect").addEventListener("change",()=>{data.activeMonth=$("monthSelect").value;calendarCursor=new Date(...data.activeMonth.split("-").map((v,i)=>i===1?Number(v)-1:Number(v)));applyRecordToInputs();render();});
+Object.keys(defaults).forEach(k=>$(k).addEventListener("change",()=>{const rec=activeRecord();if(k==="sessionCount"){const n=Math.max(1,Math.min(31,Math.round(num(k)||22)));rec.days=Array.from({length:n},(_,i)=>normalizeDay(rec.days[i]));}render();}));
+function csvCell(value){const text=String(value??"");return '"'+text.replace(/"/g,'""')+'"';}
+$("exportCsv").addEventListener("click",()=>{
+ const rec=activeRecord();
+ const headers=["Day","Trade 1 Market","Trade 1 Symbol","Trade 1 Product","Trade 1 Direction","Trade 1 Strategy","Trade 1 Entry","Trade 1 Qty","Trade 1 SL","Trade 1 Target","Trade 1 Exit","Trade 1 Result","Trade 2 Market","Trade 2 Symbol","Trade 2 Product","Trade 2 Direction","Trade 2 Strategy","Trade 2 Entry","Trade 2 Qty","Trade 2 SL","Trade 2 Target","Trade 2 Exit","Trade 2 Result","Daily P&L (INR)"];
+ let csv=headers.map(csvCell).join(",")+"\\n";
+ rec.days.forEach((d,i)=>{
+  const row=[i+1,d.assetClass1,d.symbol1,d.tradeType1,d.direction1,d.strategy1,d.entry1,d.qty1,d.slPrice1,d.targetPrice1,d.exitPrice1,d.result1,
+   d.assetClass2,d.symbol2,d.tradeType2,d.direction2,d.strategy2,d.entry2,d.qty2,d.slPrice2,d.targetPrice2,d.exitPrice2,d.result2,dayPnl(d)??""];
+  csv+=row.map(csvCell).join(",")+"\\n";
+ });
+ csv+=`\\nMonth,${data.activeMonth}\\nInitial Capital,${rec.settings.initialCapital}\\nClosing Capital,${rec.settings.initialCapital+rec.days.reduce((a,d)=>a+(dayPnl(d)??0),0)}\\n`;
+ download("universal-trading-journal-"+data.activeMonth+".csv",csv,"text/csv");
+});
+$("backup").addEventListener("click",async()=>{try{const images=await getAllTradeImages(),packed=[];for(const item of images)packed.push({id:item.id,dataUrl:await blobToDataUrl(item.blob)});const payload={...data,tradeImages:packed};download("universal-trading-journal-backup.json",JSON.stringify(payload),"application/json");}catch(e){alert("Backup failed. Please try again.");}});$("restore").addEventListener("click",()=>$("restoreFile").click());
+$("restoreFile").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(!x.months||!x.activeMonth)throw Error();const imgs=x.tradeImages||[];delete x.tradeImages;data=x;save();for(const item of imgs){if(item.id&&item.dataUrl)await saveTradeImage(item.id,await dataUrlToBlob(item.dataUrl));}applyRecordToInputs();render();alert("Monthly backup and trade screenshots restored.");}catch(err){alert("Invalid monthly backup file.");}e.target.value="";});
+$("reset").addEventListener("click",()=>{if(confirm("Reset entries for this selected month only? Take a backup first.")){const rec=activeRecord();rec.days=Array.from({length:rec.settings.sessionCount},blankDay);save();render();}});
+function download(name,content,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredPrompt=e;$("installBtn").hidden=false;});$("installBtn").addEventListener("click",async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$("installBtn").hidden=true;});
+if("serviceWorker" in navigator&&location.protocol.startsWith("http")){
+ navigator.serviceWorker.register("./sw.js").then(reg=>reg.update()).catch(err=>console.warn("Service worker registration failed",err));
+}
+load();
+</script>
+</body></html>
